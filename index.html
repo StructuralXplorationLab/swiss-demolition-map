@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Swiss Building Demolition Risk Map</title>
+<link rel="preconnect" href="https://unpkg.com" />
+
+<style>
+
+/* Leaflet 1.9.x essential layout and controls, embedded locally. */
+.leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow,
+.leaflet-tile-container,.leaflet-pane>svg,.leaflet-pane>canvas,
+.leaflet-zoom-box,.leaflet-image-layer,.leaflet-layer {
+  position:absolute;left:0;top:0;
+}
+.leaflet-container { overflow:hidden; -webkit-tap-highlight-color:transparent; background:#e9eff0; outline-offset:1px; }
+.leaflet-container.leaflet-touch-zoom { touch-action:pan-x pan-y; }
+.leaflet-container.leaflet-touch-drag { touch-action:none; touch-action:pinch-zoom; }
+.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom { touch-action:none; }
+.leaflet-container img.leaflet-image-layer,
+.leaflet-container .leaflet-tile { max-width:none!important; max-height:none!important; padding:0; border:0; }
+.leaflet-container img.leaflet-tile { width:256px; height:256px; }
+.leaflet-container .leaflet-overlay-pane svg { max-width:none!important; max-height:none!important; }
+.leaflet-tile { filter:inherit; visibility:hidden; user-select:none; -webkit-user-select:none; }
+.leaflet-tile-loaded { visibility:inherit; }
+.leaflet-tile-container { pointer-events:none; }
+.leaflet-zoom-animated { transform-origin:0 0; }
+.leaflet-zoom-anim .leaflet-zoom-animated { transition:transform .25s cubic-bezier(0,0,.25,1); }
+.leaflet-fade-anim .leaflet-popup { opacity:0; transition:opacity .2s linear; }
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup { opacity:1; }
+.leaflet-fade-anim .leaflet-tile { will-change:opacity; }
+.leaflet-zoom-anim .leaflet-zoom-animated { will-change:transform; }
+.leaflet-zoom-anim .leaflet-zoom-animated.leaflet-zoom-hide { visibility:hidden; }
+.leaflet-pane { z-index:400; }
+.leaflet-tile-pane { z-index:200; }
+.leaflet-overlay-pane { z-index:400; }
+.leaflet-shadow-pane { z-index:500; }
+.leaflet-marker-pane { z-index:600; }
+.leaflet-tooltip-pane { z-index:650; }
+.leaflet-popup-pane { z-index:700; }
+.leaflet-map-pane canvas { z-index:100; }
+.leaflet-map-pane svg { z-index:200; }
+.leaflet-control { position:relative;z-index:800;pointer-events:visiblePainted;pointer-events:auto;float:left;clear:both; }
+.leaflet-top,.leaflet-bottom { position:absolute;z-index:1000;pointer-events:none; }
+.leaflet-top {top:0}.leaflet-right {right:0}.leaflet-bottom {bottom:0}.leaflet-left {left:0}
+.leaflet-control {margin:10px}.leaflet-top .leaflet-control {margin-top:10px}.leaflet-bottom .leaflet-control {margin-bottom:10px}
+.leaflet-left .leaflet-control {margin-left:10px}.leaflet-right .leaflet-control {margin-right:10px}
+.leaflet-left .leaflet-control {float:left}.leaflet-right .leaflet-control {float:right}
+.leaflet-control-zoom,.leaflet-bar { box-shadow:0 1px 5px rgba(0,0,0,.65);border-radius:4px; }
+.leaflet-bar a { background:#fff;border-bottom:1px solid #ccc;width:30px;height:30px;line-height:30px;display:block;text-align:center;text-decoration:none;color:#000;font:bold 20px 'Lucida Console',Monaco,monospace; }
+.leaflet-bar a:hover {background:#f4f4f4}.leaflet-bar a:first-child {border-top-left-radius:4px;border-top-right-radius:4px}.leaflet-bar a:last-child {border-bottom:0;border-bottom-left-radius:4px;border-bottom-right-radius:4px}
+.leaflet-bar a.leaflet-disabled {cursor:default;background:#f4f4f4;color:#bbb}
+.leaflet-control-attribution {background:#ffffffb3;padding:0 5px;color:#333;line-height:1.5;font-size:11px}
+.leaflet-control-attribution a {text-decoration:none;color:#0078a8}.leaflet-control-attribution a:hover {text-decoration:underline}
+.leaflet-container .leaflet-control-attribution {margin:0}
+.leaflet-container a.leaflet-popup-close-button {position:absolute;top:0;right:0;border:0;text-align:center;width:24px;height:24px;font:16px/24px Tahoma,Verdana,sans-serif;color:#757575;text-decoration:none;background:transparent}
+.leaflet-popup {position:absolute;text-align:center;margin-bottom:20px}
+.leaflet-popup-content-wrapper {padding:1px;text-align:left;border-radius:12px;box-shadow:0 3px 14px rgba(0,0,0,.4);background:white;color:#333}
+.leaflet-popup-content {margin:13px 24px 13px 20px;line-height:1.3;min-height:1px}
+.leaflet-popup-tip-container {width:40px;height:20px;position:absolute;left:50%;margin-left:-20px;overflow:hidden;pointer-events:none}
+.leaflet-popup-tip {width:17px;height:17px;padding:1px;margin:-10px auto 0;transform:rotate(45deg);background:white;box-shadow:0 3px 14px rgba(0,0,0,.4)}
+.leaflet-tooltip {position:absolute;padding:6px;background:white;border:1px solid white;border-radius:3px;color:#222;white-space:nowrap;user-select:none;pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,.4);font-size:12px}
+.leaflet-tooltip-top:before,.leaflet-tooltip-bottom:before,.leaflet-tooltip-left:before,.leaflet-tooltip-right:before {position:absolute;pointer-events:none;border:6px solid transparent;content:''}
+.leaflet-tooltip-top:before {top:100%;left:50%;margin-left:-6px;border-top-color:white}
+.leaflet-tooltip-bottom:before {bottom:100%;left:50%;margin-left:-6px;border-bottom-color:white}
+.leaflet-tooltip-left:before {left:100%;top:50%;margin-top:-6px;border-left-color:white}
+.leaflet-tooltip-right:before {right:100%;top:50%;margin-top:-6px;border-right-color:white}
+.leaflet-grab {cursor:grab}.leaflet-dragging .leaflet-grab,.leaflet-dragging .leaflet-grab .leaflet-interactive {cursor:grabbing}
+.leaflet-interactive {cursor:pointer}.leaflet-container a { -webkit-tap-highlight-color:rgba(51,181,229,.4); }
+.leaflet-marker-icon,.leaflet-marker-shadow {display:block}
+.leaflet-container .leaflet-marker-icon.leaflet-div-icon {background:white;border:1px solid #666}
+.leaflet-container .leaflet-control-scale {font-size:11px}
+.leaflet-zoom-box {width:0;height:0;box-sizing:border-box;z-index:800;outline:2px dotted #38f;background:rgba(255,255,255,.5)}
+
+
+:root{--ink:#1d252b;--muted:#75828a;--soft:#a9b4bc;--line:#e1e8ec;--paper:#fff;--background:#f5f7f8;--teal:#087a76;--deep:#14282e;--red:#d62136;--shadow:0 18px 55px rgba(31,51,60,.14)}
+*{box-sizing:border-box}body{margin:0;background:var(--background);font-family:Inter,"Segoe UI",system-ui,-apple-system,sans-serif;color:var(--ink)}button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.5}
+.topbar{height:67px;background:#17262c;color:white;display:flex;align-items:center;padding:0 25px;gap:17px;position:relative;z-index:700}.logo{width:35px;height:35px;display:grid;place-items:center;border:1px solid #587077;border-radius:9px;background:linear-gradient(140deg,#264b4c,#153038);font-size:21px}.brand{display:flex;flex-direction:column;gap:3px;min-width:245px}.overline{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#9bc4c0;font-weight:700}.brand strong{font-size:17px;letter-spacing:-.3px;font-weight:660}.topbar .subtitle{margin-left:auto;color:#b7c7c9;font-size:12px;max-width:360px;text-align:right}.state-pill{border:1px solid #355255;color:#bedbd8;font-size:11px;font-weight:600;padding:6px 11px;border-radius:100px;white-space:nowrap}
+.layout{display:grid;grid-template-columns:328px minmax(0,1fr) 298px;height:calc(100vh - 67px);min-height:560px}.sidebar{position:relative;z-index:510;background:#fff;border-right:1px solid var(--line);overflow:auto;padding:21px 19px 30px;box-shadow:2px 0 20px rgba(20,42,46,.025)}.sidebar::-webkit-scrollbar,.details::-webkit-scrollbar{width:6px}.sidebar::-webkit-scrollbar-thumb,.details::-webkit-scrollbar-thumb{background:#dce4e7;border-radius:7px}.section-heading{font-size:11px;letter-spacing:1.4px;color:#788991;font-weight:800;text-transform:uppercase;margin:0 0 13px}.section-divider{height:1px;background:var(--line);margin:21px 0}.sidebar p.help{font-size:11.5px;line-height:1.65;color:#84929a;margin:6px 0 0}.file-upload{border:1px dashed #b8cdd0;border-radius:10px;background:#f8fbfa;position:relative;min-height:70px;padding:13px;display:flex;gap:12px;align-items:center;margin-bottom:10px;transition:.2s}.file-upload:has(input:focus-visible),.file-upload:hover{border-color:#42a6a2;background:#f2faf9}.file-upload input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}.upload-icon{font-size:24px;color:#4a918d;flex:none}.file-upload .f-main{font-weight:700;font-size:12px;line-height:1.3}.file-upload .f-sub{color:#8a9ca3;font-size:11px;margin-top:5px;line-height:1.3;overflow-wrap:anywhere}.file-upload.ready{background:#effaf5;border-style:solid;border-color:#b6dccc}.rowfield{display:flex;gap:10px}.field{margin:10px 0 0;min-width:0;flex:1}.field label{font-size:11.5px;color:#5e6d75;font-weight:650;display:block;margin-bottom:6px}.field select,.field input[type=text]{width:100%;outline:0;border:1px solid #dbe3e7;border-radius:7px;padding:9px 10px;background:white;color:#263238;font-size:12px;height:36px}.field select:focus,.field input:focus{border-color:#41a6a0;box-shadow:0 0 0 3px rgba(21,139,129,.10)}.inline-note{font-size:11px;color:#71858c;margin:9px 0;line-height:1.5;background:#f1f6f7;border-radius:7px;padding:9px}.primary-btn{width:100%;background:#0c7671;color:#fff;font-size:12px;font-weight:750;border:0;padding:12px 11px;border-radius:8px;margin-top:15px;display:flex;align-items:center;justify-content:center;gap:8px}.primary-btn:hover:not(:disabled){background:#085b58}.secondary-btn{border:1px solid #cfdbdf;background:white;padding:9px 11px;border-radius:8px;color:#4e656b;font-size:12px}.secondary-btn:hover{background:#f1f7f7}.progress-panel{display:none;border:1px solid #d4e9e5;border-radius:9px;background:#f5faf9;padding:12px;margin-top:13px}.progress-panel.show{display:block}.progress-head{display:flex;align-items:center;justify-content:space-between;font-size:11px;margin-bottom:7px}.progress-track{height:5px;background:#daebe9;border-radius:3px;overflow:hidden}.progress-bar{height:100%;background:#0a8680;width:0;transition:width .4s}.progress-text{font-size:11px;color:#64797c;margin-top:8px;line-height:1.5;overflow-wrap:anywhere}.progress-panel.error{background:#fff1f0;border-color:#ffcecc}.error .progress-text{color:#a23434}.summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.mini-stat{border:1px solid #e4ebee;border-radius:9px;padding:12px;background:#fafcfc}.mini-stat strong{display:block;font-size:21px;letter-spacing:-.8px;color:#203339}.mini-stat span{font-size:10px;color:#83939b}.legend-list{display:flex;flex-direction:column;gap:1px}.legend-row{display:flex;align-items:center;padding:7px 4px;gap:10px;font-size:11.5px;border-radius:5px}.legend-row:hover{background:#f7f9fa}.legend-row input{accent-color:#0c7771;width:14px;height:14px;margin:0;cursor:pointer}.swatch{width:13px;height:13px;border-radius:50%;flex:none;border:1px solid #00000010}.legend-name{font-weight:670;flex:1}.legend-count{font-size:10px;color:#78868d;font-variant-numeric:tabular-nums;text-align:right}.checkbox-row{display:flex;align-items:center;gap:8px;margin-top:11px;font-size:11px;color:#61757a}.checkbox-row input{accent-color:#0c7771}.map-area{position:relative;min-width:0}.map-container{position:absolute;inset:0;z-index:0;background:#e9eff0}.map-head{position:absolute;z-index:450;top:18px;left:19px;display:flex;gap:9px;pointer-events:none;flex-wrap:wrap}.map-badge{background:#ffffffed;box-shadow:0 4px 22px #0f26311a;border:1px solid #e6ecec;border-radius:9px;padding:10px 13px;min-width:107px;backdrop-filter:blur(12px)}.map-badge span{display:block;color:#849198;font-size:10px;text-transform:uppercase;letter-spacing:.55px;font-weight:750}.map-badge strong{display:block;margin-top:3px;font-size:17px;font-variant-numeric:tabular-nums}.map-bottom{position:absolute;z-index:440;bottom:25px;left:20px;max-width:min(460px,calc(100% - 50px));background:#1e3439e8;color:#ecf4f3;padding:11px 14px;border-radius:8px;font-size:11px;line-height:1.6;box-shadow:0 6px 20px #10222c22}.map-bottom.hidden{display:none}.map-controls{position:absolute;z-index:450;right:13px;top:18px;display:flex;flex-direction:column;gap:7px}.map-action{display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #dde6e8;border-radius:8px;box-shadow:0 3px 14px #283c451e;height:36px;width:36px;font-size:17px;color:#426068}.map-action:hover{background:#ebf6f3}.leaflet-top.leaflet-left{top:144px;left:12px}.leaflet-bar{border-color:#e6e6e6!important;box-shadow:0 4px 15px #22333a18!important}.leaflet-container{font-family:inherit}.leaflet-control-attribution{font-size:9px!important}.leaflet-interactive:focus{outline:0}.details{background:#fff;border-left:1px solid var(--line);overflow:auto;padding:21px 18px 24px;z-index:510}.searchbar{display:flex;gap:7px}.searchbar input{height:37px;min-width:0;flex:1;border:1px solid #dbe3e7;border-radius:7px;padding:9px 10px;font-size:12px}.searchbar button{border:0;background:#0b7771;color:white;padding:0 12px;border-radius:7px;font-size:12px;font-weight:700}.searchbar input:focus{outline-color:#6db0ad}.selected-panel{border:1px solid #dce7e9;border-radius:9px;margin-top:12px;padding:13px}.selected-panel.empty{border:1px dashed #d7e2e5;background:#fafcfd;text-align:center;color:#91a0a7;line-height:1.65;font-size:12px;padding:28px 12px}.risk-large{font-size:31px;font-weight:760;font-variant-numeric:tabular-nums;letter-spacing:-1px;margin:6px 0 2px}.id-caption{font-size:11px;color:#82929b}.tier-chip{display:inline-block;border-radius:30px;padding:4px 9px;font-size:10px;font-weight:800;margin-top:9px}.attribute-list{margin-top:12px;max-height:410px;overflow:auto;border-top:1px solid #edf0f1}.attribute-row{display:grid;grid-template-columns:43% 57%;gap:8px;padding:8px 0;border-bottom:1px solid #f0f3f4;font-size:10.5px;line-height:1.45}.attribute-row .k{color:#87959b;overflow-wrap:anywhere}.attribute-row .v{color:#34434a;text-align:right;overflow-wrap:anywhere;user-select:text}.top-list{margin-top:5px}.top-item{border:0;border-bottom:1px solid #edf2f3;background:white;width:100%;text-align:left;display:flex;align-items:center;gap:10px;padding:11px 4px}.top-item:hover{background:#f7fafa}.top-rank{width:22px;color:#a6b3b8;font-size:11px;font-weight:800;text-align:center}.top-item-body{flex:1;min-width:0}.top-item-body strong{font-size:11.5px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.top-item-body small{font-size:10px;color:#929fa5;display:block;margin-top:4px}.top-score{font-weight:780;font-size:13px;font-variant-numeric:tabular-nums}.top-dot{width:7px;height:7px;border-radius:50%}.empty-state{font-size:12px;color:#91a0a7;padding:15px 0}.notification{position:absolute;top:98px;left:50%;transform:translateX(-50%);z-index:600;background:#172d33ed;color:white;border-radius:9px;padding:11px 16px;font-size:12px;line-height:1.5;box-shadow:var(--shadow);display:none;max-width:min(500px,90%);text-align:center}.notification.show{display:block}.panel-label{font-size:10px;color:#9badb2;letter-spacing:1.2px;font-weight:750;text-transform:uppercase}.danger-info{color:#bb4b44!important}.footer-info{font-size:10.5px;color:#9cabb0;line-height:1.7;margin-top:17px}.link{text-decoration:none;color:var(--teal)}
+@media(max-width:1140px){.layout{grid-template-columns:290px minmax(0,1fr) 258px}.sidebar{padding:19px 15px}.details{padding:20px 14px}.topbar .subtitle{display:none}}
+@media(max-width:800px){.layout{grid-template-columns:280px minmax(0,1fr)}.details{position:absolute;z-index:520;right:0;top:67px;height:calc(100vh - 67px);width:288px;box-shadow:-8px 0 25px #233a3a20;transform:translateX(100%);transition:transform .25s}.details.open{transform:translateX(0)}.detail-toggle{display:block!important}}
+@media(max-width:570px){.layout{grid-template-columns:1fr;grid-template-rows:0 minmax(380px,1fr);height:calc(100dvh - 67px)}.sidebar{position:absolute;z-index:530;width:min(340px,90vw);top:67px;bottom:0;transform:translateX(-100%);transition:transform .25s;box-shadow:8px 0 24px #233a3a20}.sidebar.open{transform:translateX(0)}.map-area{grid-column:1;grid-row:2}.topbar{padding:0 13px}.brand strong{font-size:14px}.brand{min-width:0}.state-pill{margin-left:auto;font-size:10px}.mobile-panel-btn{display:flex!important}.map-head{left:12px;top:12px}.map-badge{padding:8px 9px;min-width:78px}.map-badge strong{font-size:14px}.map-controls{top:91px}.notification{top:145px}}
+.mobile-panel-btn,.detail-toggle{display:none;border:1px solid #496067;background:transparent;color:#fff;border-radius:7px;padding:7px 10px;font-size:12px}
+
+/* EPFL-inspired clean navigation */
+.topbar{background:#fff;color:#20252a;border-bottom:1px solid #e4e7eb;gap:16px;box-shadow:0 1px 7px rgba(0,0,0,.045)}
+.site-title{font-family:Arial,Helvetica,sans-serif;font-size:clamp(15px,1.65vw,23px);font-weight:700;letter-spacing:-.45px;line-height:1.25;margin:0;min-width:0;flex:1}
+.epfl-brand{margin-left:auto;display:flex;align-items:center;justify-content:flex-end;flex:none;text-decoration:none}
+.epfl-brand img{display:block;width:132px;height:46px;object-fit:contain;object-position:center}
+.epfl-fallback{font-family:Arial,Helvetica,sans-serif;font-size:29px;font-weight:900;letter-spacing:-2px;color:#ff0000}
+.mobile-panel-btn,.detail-toggle{color:#24343a;border-color:#d6dee1;background:#fff}
+@media(max-width:570px){.topbar{gap:9px}.site-title{font-size:13px;letter-spacing:-.15px}.epfl-brand img{width:85px;height:31px}.epfl-fallback{font-size:21px}.mobile-panel-btn,.detail-toggle{padding:6px 7px;font-size:11px}}
+
+.public-explainer{font-size:12px;line-height:1.65;color:#445760}
+.public-explainer p{margin:0 0 13px}
+.public-explainer strong{color:#26353b}
+.source-notes{font-size:11px;line-height:1.6;color:#62757d;margin-top:17px;padding-top:13px;border-top:1px solid #e2e9eb}
+.source-notes strong{font-size:11px;color:#35464d}
+.source-notes p{margin:6px 0}
+.source-notes a{color:#08746f;text-decoration:underline;text-underline-offset:2px}
+
+/* Public exhibition: retain diagnostic DOM nodes for existing JS, but hide them.
+   Dataset discovery/import progress continues in browser console and server logs. */
+.map-head, #publicProgressPanel, #mapHint {display:none!important}
+/* Public-facing layout: no building search or details sidebar. */
+.layout{grid-template-columns:328px minmax(0,1fr)}
+#details{display:none!important}
+.detail-toggle{display:none!important}
+.epfl-brand img{width:150px;height:48px;object-fit:contain}
+@media(max-width:1140px){.layout{grid-template-columns:290px minmax(0,1fr)}}
+@media(max-width:800px){.layout{grid-template-columns:280px minmax(0,1fr)}}
+@media(max-width:570px){.layout{grid-template-columns:1fr;grid-template-rows:0 minmax(380px,1fr)}.epfl-brand img{width:90px;height:34px}}
+
+/* Public-facing research and dataset panels */
+.public-caution{padding:0;background:transparent;border:0;border-radius:0;color:inherit}
+.first-source{border-top:0;padding-top:0;margin-top:0}
+.method-details{margin-top:12px;border:1px solid #e0e8ea;border-radius:8px;background:#f9fbfb;padding:10px 11px;font-size:11px;line-height:1.6;color:#50636b}
+.method-details summary{cursor:pointer;font-weight:700;color:#263b43;list-style-position:inside}
+.method-details p{margin:10px 0 0}
+.dataset-pending{display:inline-block;padding:7px 10px;border:1px solid #dce5e8;border-radius:6px;background:#f5f8f9;color:#627880;font-size:11px;font-weight:650}
+/* Disable pointer cursor for map features because there is no detail interaction. */
+.leaflet-interactive{cursor:default}
+
+/* Slightly wider public information panel; map remains flexible. */
+.layout{grid-template-columns:290px minmax(0,1fr)}
+@media(max-width:1140px){.layout{grid-template-columns:290px minmax(0,1fr)}}
+@media(max-width:800px){.layout{grid-template-columns:280px minmax(0,1fr)}}
+@media(max-width:570px){.layout{grid-template-columns:1fr;grid-template-rows:0 minmax(380px,1fr)}}
+
+/* Two-line compact EPFL site header */
+.site-heading{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.site-heading .site-title{flex:none;font-size:clamp(15px,1.55vw,21px);line-height:1.18}
+.site-subtitle{margin:0;font:400 clamp(12px,1.05vw,14px)/1.25 Arial,Helvetica,sans-serif;color:#54646a}
+@media(max-width:570px){.site-heading .site-title{font-size:13px}.site-subtitle{font-size:11px;line-height:1.2}}
+/* CSV import progress lives over the right-hand map, not inside the sidebar. */
+.map-import-progress{position:absolute;z-index:540;top:72px;right:16px;width:min(300px,calc(100% - 32px));margin:0;background:#ffffffee;box-shadow:0 5px 22px #142b3222;backdrop-filter:blur(8px);pointer-events:none}
+.map-import-progress.error{background:#fffafa;border-color:#efc7c3}
+.map-import-progress .progress-text{max-height:140px;overflow-y:auto;white-space:normal}
+@media(max-width:570px){.map-import-progress{top:146px;right:12px;width:min(290px,calc(100% - 24px))}}
+
+/* Compact language selector at the top-right, adjacent to the EPFL logo. */
+.language-switch{display:flex;align-items:center;gap:4px;flex:none;white-space:nowrap;color:#9ba2a8;font:600 12px Arial,sans-serif}
+.language-switch button{border:0;border-radius:4px;padding:6px 5px;background:transparent;color:#656d73;font-size:12px;font-weight:700;line-height:1;cursor:pointer}
+.language-switch button.active{background:#eaeef0;color:#d62136}
+.language-switch button:focus-visible{outline:2px solid #d62136;outline-offset:2px}
+@media(max-width:800px){.topbar{gap:9px}.epfl-brand img{width:99px}.language-switch{gap:2px}.language-switch button{padding:6px 3px}}
+@media(max-width:570px){.epfl-brand img{width:66px;height:27px}.language-switch button{font-size:11px}.topbar{gap:6px}.site-title{font-size:12px}.site-subtitle{font-size:10px}}
+/* Visible status for static demo/error; doesn't alter the public information panels. */
+.static-status{position:absolute;top:20px;left:20px;z-index:455;border-radius:7px;background:#fff8e1;color:#704c10;border:1px solid #ead39a;box-shadow:0 4px 15px #0002;padding:8px 12px;font-size:12px;font-weight:700;max-width:min(450px,85%)}
+.static-status:empty{display:none}
+</style>
+</head>
+<body>
+<header class="topbar">
+<button class="mobile-panel-btn" id="openSidebar" title="Open data panel">☰</button>
+<div class="site-heading"><h1 class="site-title">Swiss Building Demolition Risk Map</h1><p class="site-subtitle">Is Your Building at Risk of Demolition by 2030?</p></div>
+<nav class="language-switch" aria-label="Website language"><button type="button" data-lang="en" aria-label="English" aria-pressed="true">EN</button><span aria-hidden="true">/</span><button type="button" data-lang="de" aria-label="Deutsch" aria-pressed="false">DE</button><span aria-hidden="true">/</span><button type="button" data-lang="fr" aria-label="Français" aria-pressed="false">FR</button></nav>
+<a class="epfl-brand" href="https://www.epfl.ch/" target="_blank" rel="noopener noreferrer" aria-label="EPFL website"><img src="https://cdn.jsdelivr.net/npm/epfl-theme-elements@8.6.0/dist/icons/epfl-logo.svg" alt="EPFL" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="epfl-fallback" style="display:none">EPFL</span></a>
+
+
+<button class="mobile-panel-btn detail-toggle" id="openDetails">Details</button>
+</header>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <div id="internalImportControls" hidden aria-hidden="true">
+  <div class="section-heading">01 / BUILDING DATA</div>
+  <label class="file-upload" id="primaryDrop">
+    <span class="upload-icon">⇧</span><span><div class="f-main">Upload risk CSV or GeoPackage</div><div class="f-sub" id="primaryName">Risk scores and building attributes · .csv / .gpkg</div></span>
+    <input type="file" id="primaryFile" accept=".csv,.gpkg" />
+  </label>
+  <div class="rowfield" style="align-items:end;margin:2px 0 12px"><div class="field" style="margin:0"><label for="savedSelect">Or open an existing dataset</label><select id="savedSelect"><option value="">No saved datasets</option></select></div><button id="openSaved" class="secondary-btn" style="height:36px" disabled>Open</button></div>
+  <div class="field"><label for="riskField">Demolition risk field</label><select id="riskField"><option value="">Upload a file first</option></select></div>
+  <div class="field"><label for="riskId">Building ID field</label><select id="riskId"><option value="">Automatic row ID</option></select></div>
+  <div class="field" id="layerBox" style="display:none"><label for="layer">GeoPackage layer</label><select id="layer"></select></div>
+  <div id="csvGeometryOptions" style="display:none">
+    <div class="section-divider"></div>
+    <div class="section-heading" style="margin-bottom:4px">02 / CSV GEOMETRY</div>
+    <p class="help">If your CSV contains WKT, select the geometry field. Otherwise, choose X/Y coordinates to display building points.</p>
+    <div class="field"><label for="wktField">WKT geometry (preferred)</label><select id="wktField"><option value="">No WKT</option></select></div>
+    <div class="rowfield"><div class="field"><label for="xField">X / Longitude</label><select id="xField"><option value="">Not used</option></select></div><div class="field"><label for="yField">Y / Latitude</label><select id="yField"><option value="">Not used</option></select></div></div>
+    <div class="field"><label for="csvCrs">CSV coordinate reference system</label><select id="csvCrs"><option value="EPSG:4326">WGS84 · EPSG:4326</option><option value="EPSG:2056">Swiss LV95 · EPSG:2056</option><option value="EPSG:21781">Swiss LV03 · EPSG:21781</option><option value="EPSG:3857">Web Mercator · EPSG:3857</option></select></div>
+  </div>
+  <div class="field"><label for="riskScale">Risk score scale</label><select id="riskScale"><option value="auto">Auto-detect (0–1 / 0–100)</option><option value="probability">Raw values (usually 0–1)</option><option value="percent">Percentage (0–100 → 0–1)</option></select></div>
+  <button id="importBtn" class="primary-btn" disabled>◈ &nbsp;Import and display GIS data</button>
+  <div class="progress-panel" id="progressPanel"><div class="progress-head"><strong id="progressTitle">Importing</strong><span id="progressValue">0%</span></div><div class="progress-track"><div class="progress-bar" id="progressBar"></div></div><div class="progress-text" id="progressText">Preparing…</div></div>
+  <div class="section-divider"></div>
+  </div>
+  <div class="section-heading">01 / BASEMAP SELECTION</div>
+  <div class="field" style="margin:0 0 14px">
+    <select id="basemapSelect" aria-label="Map background">
+      <option value="street" selected>Street map</option>
+      <option value="topographic">Swisstopo topographic map</option>
+      <option value="satellite">SWISSIMAGE aerial imagery</option>
+    </select>
+  </div>
+  <div class="section-divider"></div>
+  <div class="section-heading">02 / DEMOLITION RISK LEVELS</div>
+  <div id="legendList" class="legend-list"></div>
+  <p class="help" style="margin-top:10px">Top 1% means the 1% of buildings with the highest predicted risk scores nationwide.</p>
+  <div class="section-divider"></div>
+  <div class="section-heading">03 / ABOUT THE DATA</div>
+  <div class="public-explainer">
+    <p>This interactive map shows buildings across Switzerland ranked by their predicted demolition risk between 2027 and 2030.</p>
+    <p>Buildings are grouped into the top 0.1%, 0.5%, 1%, 5%, and 10% of predicted risk nationwide. Darker red indicates a higher relative risk.</p>
+    <p>Demolition risk is estimated using a machine learning model trained on historical Swiss building data from 2012 to 2025. The model considers various features from publicly available data, including construction year, building type, number of floors, location, accessibility, and socioeconomic indicators. However, the model cannot account for all factors that may influence actual demolition decisions.</p>
+    <p class="public-caution">In the published study using historical Swiss building data up to 2024, 85.0%, 45.5%, and 29.6% of buildings ranked in the top 0.1%, 0.5%, and 1% for demolition risk, respectively, were subsequently demolished within four years. These historical results are provided for reference, and predictive performance can differ for 2027–2030.</p>
+    <p>We believe this map can support building preservation, urban planning, and the identification of reusable building materials. This map is provided for research and informational purposes only. Its predictions should not be interpreted as confirmed demolition plans. The authors and their affiliated institutions assume no liability for decisions or actions taken in reliance on these predictions.</p>
+  </div>
+  <div class="section-divider"></div>
+  <div class="section-heading">04 / RELATED RESEARCH</div>
+  <div class="source-notes first-source"><strong>Research publication</strong>
+    <p class="research-citation">Gao, H., &amp; Fivet, C. (2026). <a href="https://www.sciencedirect.com/science/article/pii/S0198971526000839" target="_blank" rel="noopener">Spatiotemporal machine learning for building demolition risk modelling</a>. <em>Computers, Environment and Urban Systems, 129</em>, 102481. <a href="https://doi.org/10.1016/j.compenvurbsys.2026.102481" target="_blank" rel="noopener">DOI</a>.</p>
+  </div>
+  <div class="source-notes"><strong>Dataset</strong>
+    <p><a href="https://doi.org/10.5281/zenodo.23669030" target="_blank" rel="noopener noreferrer">View dataset on Zenodo</a></p>
+    <p>The test performance of the model used for the 2027–2030 predictions, evaluated on an independent 20% holdout of buildings, is available in the dataset.</p>
+  </div>
+  <div class="source-notes"><strong>Map sources and credits</strong>
+    <p>Street map: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a> (ODbL).</p>
+    <p>Topographic map: © <a href="https://www.swisstopo.admin.ch/" target="_blank" rel="noopener">swisstopo</a> (Swiss national maps).</p>
+    <p>Aerial imagery: © <a href="https://www.swisstopo.admin.ch/" target="_blank" rel="noopener">swisstopo</a> (SWISSIMAGE).</p>
+  </div>
+
+</aside>
+<main class="map-area">
+  <div id="map" class="map-container"></div><div id="staticStatus" class="static-status" role="status"></div>
+  <div class="map-head">
+    <div class="map-badge"><span>Buildings in view</span><strong id="visibleCount">—</strong></div>
+    <div class="map-badge"><span>Loaded dataset</span><strong id="datasetLabel" style="font-size:12px;margin-top:7px;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Preparing dataset…</strong></div>
+  </div>
+  <div class="progress-panel show map-import-progress" id="publicProgressPanel" role="status" aria-live="polite" >
+    <div class="progress-head"><strong id="publicProgressTitle">Building data</strong><span id="publicProgressValue">—</span></div>
+    <div class="progress-track"><div class="progress-bar" id="publicProgressBar" style="width:0%"></div></div>
+    <div class="progress-text" id="publicProgressText">Checking saved datasets and local CSV…</div>
+  </div>
+  <div class="map-controls"><button class="map-action" id="fitAll" title="Zoom to dataset extent">⌗</button><button class="map-action" id="reloadMap" title="Refresh map">↻</button></div>
+  <div class="map-bottom" id="mapHint">Preparing the Swiss building risk map. First-time setup may take several minutes…</div>
+  <div class="notification" id="notification"></div>
+</main>
+<!-- The right-hand search and selected-building panels were removed for the public view.
+     Hidden compatibility nodes preserve existing map-click and search JavaScript behavior. -->
+<div id="details" hidden aria-hidden="true">
+  <input id="searchInput" type="hidden" />
+  <button id="searchBtn" type="button" hidden></button>
+  <div id="selectedPanel" hidden></div>
+</div>
+</div>
+<script src="./i18n.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="./map-static.js"></script>
+</body>
+</html>

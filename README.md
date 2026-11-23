@@ -1,4 +1,5 @@
 # Swiss Building Demolition Risk Map (2027–2030)
+Author: Han Gao
 
 An interactive web map visualizing predicted building demolition risks across Switzerland for the period 2027–2030.
 

@@ -12,4 +12,4 @@ The website supports English, German, and French and provides multiple basemap o
 
 **Dataset:** https://doi.org/10.5281/zenodo.23669030
 
-**Interactive map:** https://gaohan23.github.io/swiss-demolition-map/
+**Interactive map:** https://structuralxplorationlab.github.io/swiss-demolition-map/
